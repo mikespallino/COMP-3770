@@ -31,7 +31,7 @@ def folders():
     for item in files:
         if os.path.isdir(item):
             midi_files = os.listdir(item)
-            midi_files = [x for x in midi_files if x.endswith('.mid')]
+            midi_files = [x for x in midi_files if x.endswith('.mid') and '_track' not in x]
             print(midi_files)
             for midi_file in midi_files:
                 create_separate_files(os.path.join(os.path.abspath(item), midi_file))
