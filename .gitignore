@@ -1,3 +1,4 @@
 *.mid
 *.midi
 *.json
+*.pyc
