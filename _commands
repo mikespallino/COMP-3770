@@ -1,0 +1,5 @@
+python2 conductor.py compose pInput=pitches.json rInput=rhythm.json output=song.mid
+
+python2 conductor.py parse input=./music output=rhythm.json parse=rhythm order=4
+
+python2 conductor.py parse input=./music output=pitches.json parse=pitch order=2
