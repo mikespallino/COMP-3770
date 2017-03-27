@@ -1,5 +1,6 @@
 import random
 import json
+import ast
 
 class Markov:
     "Class to produce probabilties of next event given previous events"
@@ -21,7 +22,8 @@ class Markov:
 
     def order(self):
         keys = self.sequenceCounts.keys()
-        return keys[0].count(',') + 1
+        firstItem = ast.literal_eval(keys[0])
+        return len(firstItem)
 
     def getSequences(self):
         return self.sequenceCounts.keys()

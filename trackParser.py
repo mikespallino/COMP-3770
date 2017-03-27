@@ -44,24 +44,38 @@ def parseFile(fileName, transitions, markovOrder, parseFor):
         individual_track.make_ticks_abs()
         #Get each note in the track
         previousNotes = []
+        previousNoteOnTime = None
+        currentChord = []
+        pitch = None
+        length = None
+
         for event in individual_track:
 
             if type(event) is midi.NoteOnEvent and event.data[1] != 0: # noteOffs are ocasionaly notesOn with velocity of 0
                 noteOnTime = event.tick
-                if parseFor == "pitch":
-                    note = event.data[0]
-                    if len(previousNotes) >= markovOrder:
-                        transitions.push( previousNotes[-markovOrder:] , note)
-                    previousNotes.append(note)
+                pitch = event.data[0]
 
             elif type(event) is midi.NoteOffEvent or (type(event) is midi.NoteOnEvent and event.data[1] == 0):
-                if parseFor == "rhythm":
-                    noteOffTime = event.tick
-                    length = noteOffTime - noteOnTime
-                    length = int( (length + float(beat / 2)) / beat )
-                    if len(previousNotes) >= markovOrder:
-                        transitions.push( previousNotes[-markovOrder:] , length)
-                    previousNotes.append(length)
+                noteOffTime = event.tick
+                length = noteOffTime - noteOnTime
+                length = int( (length + float(beat / 2)) / beat )
+
+            if pitch != None and ( type(event) is midi.NoteOnEvent and event.data[1] != 0 ):
+                if noteOnTime == previousNoteOnTime:
+                    currentChord.append(pitch)
+                else:
+                    print "Chord: %s" % currentChord
+                    if parseFor == "pitch":
+                        if len(previousNotes) >= markovOrder:
+                            transitions.push( previousNotes[-markovOrder:] , str(currentChord) )
+                        previousNotes.append(currentChord)
+                    elif parseFor == "rhythm":
+                        if len(previousNotes) >= markovOrder:
+                            transitions.push( previousNotes[-markovOrder:] , length)
+                        previousNotes.append(length)
+
+                    currentChord = [pitch]
+                    previousNoteOnTime = noteOnTime
 
 
 def getFiles(folderName):
