@@ -57,8 +57,6 @@ def compose(pitchInputFileName, rhythmInputFileName, outputFileName, songLength)
     track = midi.Track()
     pattern.append(track)
 
-    currentTick = 0
-
     for i in range(songLength):
         length = int( (220 / 16 ) * rhythms[i])
         # for pitch in chords[i]:
@@ -68,8 +66,6 @@ def compose(pitchInputFileName, rhythmInputFileName, outputFileName, songLength)
         for pitch in chords[i]:
             off = midi.NoteOffEvent(tick=length, pitch=pitch)
             track.append(off)
-
-        currentTick += length
 
     eot = midi.EndOfTrackEvent(tick=currentTick)
     track.append(eot)
