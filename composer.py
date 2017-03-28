@@ -14,6 +14,8 @@ def compose(pitchInputFileName, rhythmInputFileName, outputFileName, songLength)
     rhythmTransitions = Markov(rhythmInputFileName)
     rhythmOrder = rhythmTransitions.order()
 
+    print "Markovs loaded into memmory"
+
     # Build random beging of song
     chords = []
     for i in range(pithOrder):
@@ -67,7 +69,7 @@ def compose(pitchInputFileName, rhythmInputFileName, outputFileName, songLength)
             off = midi.NoteOffEvent(tick=length, pitch=pitch)
             track.append(off)
 
-    eot = midi.EndOfTrackEvent(tick=currentTick)
+    eot = midi.EndOfTrackEvent(tick=0)
     track.append(eot)
     midi.write_midifile(outputFileName, pattern)
 

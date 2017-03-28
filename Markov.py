@@ -32,11 +32,11 @@ class Markov:
         sequence = str(sequence)
 
         #make sure sequence is in ds
-        if sequence not in list( self.sequenceCounts.keys() ):
+        if sequence not in self.sequenceCounts:
             self.sequenceCounts[sequence] = dict()
 
         #make sure current event for sequence in ds
-        if event not in list(self.sequenceCounts[sequence].keys() ):
+        if event not in self.sequenceCounts[sequence]:
             self.sequenceCounts[sequence][event] = 1
         else:
             self.sequenceCounts[sequence][event] += 1

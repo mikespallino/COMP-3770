@@ -9,13 +9,18 @@ def parseMidis(sourcefolderName, outputFileName, markovOrder, parseFor):
 
     folderName = os.path.abspath(sourcefolderName)
     files = getFiles(folderName)
-    print str(len(files)) + " files found"
+    numOfFiles = len(files)
+    print "%d files found" % numOfFiles
 
     #parse each file and push to markovDS
     transitions = Markov()
+    i = 1
     for fileName in files:
+        print "parsing file %d of %d" % (i, numOfFiles)
         parseFile(fileName, transitions, markovOrder, parseFor)
-
+        i += 1
+        if i % 100 == 0:
+            transitions.writeToFile(outputFileName)
     print "Files parsed"
 
     #write as json to file
@@ -56,15 +61,15 @@ def parseFile(fileName, transitions, markovOrder, parseFor):
                 pitch = event.data[0]
 
             elif type(event) is midi.NoteOffEvent or (type(event) is midi.NoteOnEvent and event.data[1] == 0):
-                noteOffTime = event.tick
-                length = noteOffTime - noteOnTime
-                length = int( (length + float(beat / 2)) / beat )
+                if parseFor == "rhythm":
+                    noteOffTime = event.tick
+                    length = noteOffTime - noteOnTime
+                    length = int( (length + float(beat / 2)) / beat )
 
             if pitch != None and ( type(event) is midi.NoteOnEvent and event.data[1] != 0 ):
                 if noteOnTime == previousNoteOnTime:
                     currentChord.append(pitch)
                 else:
-                    print "Chord: %s" % currentChord
                     if parseFor == "pitch":
                         if len(previousNotes) >= markovOrder:
                             transitions.push( previousNotes[-markovOrder:] , str(currentChord) )
@@ -77,6 +82,8 @@ def parseFile(fileName, transitions, markovOrder, parseFor):
                     currentChord = [pitch]
                     previousNoteOnTime = noteOnTime
 
+    return True
+
 
 def getFiles(folderName):
     """
@@ -87,18 +94,19 @@ def getFiles(folderName):
     for item in files:
         item = os.path.join(folderName, item)
         if os.path.isdir(item):
+            # print "Looking in folder: %s" % item
             allFiles += getFiles( item )
         else:
-            if item.endswith('.mid'):
-                allFiles.append(item)
+            # print item
+            allFiles.append(item)
 
     return allFiles
 
-if __name__ == '__main__':
-    folderName= sys.argv[1]
-    print "Parsing %s" % folderName
-    folders(folderName)
-    i = 0;
-    for num in range(0,10000):
-        if markov.get( (46,64) ) == 67:
-            i += 1
+# if __name__ == '__main__':
+#     folderName= sys.argv[1]
+#     print "Parsing %s" % folderName
+#     folders(folderName)
+#     i = 0;
+#     for num in range(0,10000):
+#         if markov.get( (46,64) ) == 67:
+#             i += 1
