@@ -53,6 +53,7 @@ def parseFile(fileName, transitions, markovOrder, parseFor):
         currentChord = []
         pitch = None
         length = None
+        noteOnTime = 0
 
         for event in individual_track:
 
