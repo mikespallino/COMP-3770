@@ -1,5 +1,6 @@
 import random
 import json
+import ast
 
 class Markov:
     "Class to produce probabilties of next event given previous events"
@@ -21,7 +22,8 @@ class Markov:
 
     def order(self):
         keys = self.sequenceCounts.keys()
-        return keys[0].count(',') + 1
+        firstItem = ast.literal_eval(keys[0])
+        return len(firstItem)
 
     def getSequences(self):
         return self.sequenceCounts.keys()
@@ -30,11 +32,11 @@ class Markov:
         sequence = str(sequence)
 
         #make sure sequence is in ds
-        if sequence not in list( self.sequenceCounts.keys() ):
+        if sequence not in self.sequenceCounts:
             self.sequenceCounts[sequence] = dict()
 
         #make sure current event for sequence in ds
-        if event not in list(self.sequenceCounts[sequence].keys() ):
+        if event not in self.sequenceCounts[sequence]:
             self.sequenceCounts[sequence][event] = 1
         else:
             self.sequenceCounts[sequence][event] += 1

@@ -1,24 +1,12 @@
 import midi
 import os
 import sys
+import ast
 import random
 from Markov import Markov
 
 NOTE_VELOCITY = 50
 NOTE_DURATION = [110, 220, 440]
-
-def get_rand_duration():
-    """
-    This just randomly picks between eigth, quarter, and whole notes to add some
-    variety
-    """
-    prob = random.randint(0, 100)
-    if prob < 60:
-        return 1
-    elif prob < 90:
-        return 2
-    else:
-        return 0
 
 def compose(pitchInputFileName, rhythmInputFileName, outputFileName, songLength):
     pitchTransitions = Markov(pitchInputFileName)
@@ -26,21 +14,24 @@ def compose(pitchInputFileName, rhythmInputFileName, outputFileName, songLength)
     rhythmTransitions = Markov(rhythmInputFileName)
     rhythmOrder = rhythmTransitions.order()
 
+    print "Markovs loaded into memmory"
+
     # Build random beging of song
-    pitches = []
+    chords = []
     for i in range(pithOrder):
-        pitches.append( random.randint(50,60) )
-    # Build list of pitches
-    while( len(pitches) < songLength):
-        newPitch = pitchTransitions.get( pitches[-pithOrder:] )
-        if newPitch is not None:
-            newPitch = int(newPitch)
-            pitches.append( newPitch )
+        chords.append( [random.randint(50,60)] )
+    # Build list of chords
+    while( len(chords) < songLength):
+        newChord = pitchTransitions.get( chords[-pithOrder:] )
+        if newChord is not None:
+            newChord = ast.literal_eval(newChord)
+            chords.append( newChord )
         else:
-            print "INFO: No possible pitch found"
-            del pitches[-1]
+            print "INFO: No possible pitch/chord found"
+            del chords[-1]
+            chords.append( [random.randint(50,60)] )
     # prettier endings
-    pitches[-1] = pitches[-2]
+    chords[-1] = chords[-2]
 
     # Create begining of rhythm track
     rhythms = []
@@ -69,15 +60,16 @@ def compose(pitchInputFileName, rhythmInputFileName, outputFileName, songLength)
     pattern.append(track)
 
     for i in range(songLength):
-        length = int( (440 / 16 ) * rhythms[i] )
-        pitch = pitches[i]
+        length = int( (220 / 16 ) * rhythms[i])
+        # for pitch in chords[i]:
+        for pitch in chords[i]:
+            on = midi.NoteOnEvent(tick=0, velocity=NOTE_VELOCITY, pitch=pitch)
+            track.append(on)
+        for pitch in chords[i]:
+            off = midi.NoteOffEvent(tick=length, pitch=pitch)
+            track.append(off)
 
-        on = midi.NoteOnEvent(tick=2, velocity=NOTE_VELOCITY, pitch=pitch)
-        off = midi.NoteOffEvent(tick=length, pitch=pitch)
-        track.append(on)
-        track.append(off)
-
-    eot = midi.EndOfTrackEvent(tick=1)
+    eot = midi.EndOfTrackEvent(tick=0)
     track.append(eot)
     midi.write_midifile(outputFileName, pattern)
 
